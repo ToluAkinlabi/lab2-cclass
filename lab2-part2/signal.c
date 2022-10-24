@@ -4,53 +4,44 @@
 #include <signal.h>
 #include <unistd.h>
 
-void handler(int signum)
-{ //signal handler
+int alarmTriggered = 0;
+int alarmcount = 0;
+long start, end;
+
+
+void alarmhandler(int signum){ 
+  //signal handler
   printf("Hello World!\n");
-  exit(1); //exit after printing
+  sleep(2);
+  alarmTriggered = 1;
+  alarmcount++;
+  alarm(2); //Schedule a SIGALRM for 1 second
 }
 
-int main(int argc, char * argv[])
-{
-  signal(SIGALRM,handler); //register handler to handle SIGALRM  
-  alarm(1); //Schedule a SIGALRM for 1 second
+void timeHandler(){
+    printf("The number of time alarms = %d\n", alarmcount);
+    end = time(NULL);
 
-  printf("Turing was right!\n");
-  while(0); //busy wait for signal to be delivered
-  return 0; //never reached
+    // Calculating total time taken by the program.
+	long time_taken = (end - start);
+    printf("The total time taken = %ld seconds\n", time_taken); 
 }
 
+int main(int argc, char * argv[]){
+    signal(SIGALRM,alarmhandler);
+    signal(SIGINT,timeHandler);
+    start = time(NULL);
+    alarm(2); //Schedule a SIGALRM for 1 second
+    while(1){
+         //register handler to handle SIGALRM  
+        alarmTriggered = 0;
+  
+        while(!alarmTriggered)
+            ;
 
-
-
-/* hello_signal.c 
-#include <stdio.h>
-#include <stdlib.h>
-#include <signal.h>
-#include <unistd.h>
-
-void handler(int signum)
-{ //signal handler
-  printf("Hello World!\n");
-  exit(1); //exit after printing
+        printf("Turing was right!\n");
+ 
+    }
+    
 }
 
-void extra(int signum){
-  // Extra line 
-  printf("Turing was right!\n");
-  exit(1); //exit after printing
-
-}
-
-int main(int argc, char * argv[])
-{
-  do{
-     signal(SIGALRM,handler);
-     alarm(1); 
-     signal(SIGALRM,extra);
-  }while(1);
-
-  return 0; //never reached
-}
-
-*/
