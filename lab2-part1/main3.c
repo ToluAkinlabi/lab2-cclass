@@ -7,85 +7,60 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-void  ChildProcessOne(void); 
-void  ChildProcessTwo(void);               
-void  ParentProcess(void);
+void  ChildProcessOne(void);              
+void  ParentProcess(int);
 
 //Main Code
 void main(void){
   int pid, pid1;
+  int i;
 
-  pid = fork();
-  if (pid == 0){
+  for(i=0; i<2; i++){
 
-    //Child One Process
-    ChildProcessOne();
-    }
-  else{
-    pid1 = fork();
-    if (pid1 == 0){
-
-      //Calling Child Two Process
-      ChildProcessTwo();
-    }
-    else{
-
-      //Calling Parent Process
-      ParentProcess();
+      pid = fork();
+      if (pid == 0){
+        //Child One Process
+        ChildProcessOne();
       }
-    }
+      else if(pid < 0){
+        printf("Error while forking child!");
+        exit(0);  
+      }
   }
+
+  for(i=0; i<2; i++){
+      pid = wait(NULL);
+      //Calling Parent Process
+      ParentProcess(pid);
+  }
+    
+  
+}
 
 //Cild One process
 void  ChildProcessOne(void){
 
   int i, n;
-  time_t t;
-   
-   n = 30;
-   
+
    // Intializes random number generator 
-   srand((unsigned) time(&t));
+   srand(getpid());
    int random = rand();
+   n = random % 31;
 
    // loop contains random number of iteration but not more tahn 30
    for( i = 0 ; i < n ; i++ ) {
-     printf("Child Pid: %d is going to sleep!", getpid());
-     sleep(random);
-     printf("Child Pid:%d is awake!\n Where is my Parent: ppid %d", 
+     printf("Child Pid: %d is going to sleep!\n", getpid());
+
+     sleep(rand() % 11);
+     printf("Child Pid:%d is awake!\n Where is my Parent: ppid %d\n", 
       getpid(), getppid());
    }
    
    exit(0);
 }
-
-//Child Two Process
-void  ChildProcessTwo(void){
-
-  int i, n;
-  time_t t;
-   
-   n = 30;
-   
-   // Intializes random number generator 
-   srand((unsigned) time(&t));
-   int random = rand();
-
-   // loop contains random number of iteration but not more tahn 30
-   for( i = 0 ; i < n ; i++ ) {
-     printf("Child Pid: %d is going to sleep!", getpid());
-     sleep(random);
-     printf("Child Pid: %d is awake!\n Where is my Parent: ppid %d", 
-      getpid(), getppid());
-   }
-   
-   exit(0);
-}
-
 
 //Parent Process
-void ParentProcess(void){
+void ParentProcess(int chpid){
   int stat; //initializing status
-  wait(&stat);
-  printf("Child Pid: %d has completed!\n", getpid());
+  printf("Child Pid: %d has completed!\n", chpid);
 }
